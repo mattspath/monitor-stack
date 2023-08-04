@@ -46,13 +46,13 @@ influx v1 auth create --host http://${DOCKER_INFLUXDB_INIT_HOST}:${DOCKER_INFLUX
 
 
 #Example
-curl --request POST http://localhost:8086/api/v2/dbrps \
-  --header "Authorization: Token changeme" \
-  --header 'Content-type: application/json' \
-  --data '{
-        "bucketID": "6aa7aeeac371c5aa",
-        "database": "test",
-        "default": true,
-        "orgID": "be1300ecfc0fc866",
-        "retention_policy": "4d"
-      }'
+# curl --request POST http://localhost:8086/api/v2/dbrps \
+#   --header "Authorization: Token changeme" \
+#   --header 'Content-type: application/json' \
+#   --data '{
+#         "bucketID": "6aa7aeeac371c5aa",
+#         "database": "test",
+#         "default": true,
+#         "orgID": "be1300ecfc0fc866",
+#         "retention_policy": "4d"
+#       }'
