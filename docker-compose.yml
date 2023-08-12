@@ -2,10 +2,16 @@ version: "3"
 
 services:
   influxdb:
+    # Full tag list: https://hub.docker.com/r/library/influxdb/tags/
     image: influxdb:2.1.1
+    # image: ${INFLUXDB_TAG}
     restart: on-failure:10
     volumes:
       - influxdb-storage:/var/lib/influxdb2:rw
+      # # Mount for influxdb data directory
+      # - ./influxdb/data:/var/lib/influxdb
+      # # Mount for influxdb configuration
+      # - ./influxdb/config/:/etc/influxdb/
     env_file:
       - .env
     entrypoint: ["./entrypoint.sh"]
@@ -13,26 +19,34 @@ services:
       - ${DOCKER_INFLUXDB_INIT_PORT}:8086
     networks:
       - tig
-      # - tick      
+      - tick      
 
 
   telegraf:
-    image: telegraf:1.19
+    # Full tag list: https://hub.docker.com/r/library/telegraf/tags/
+    # image: telegraf:1.19
+    image: ${TELEGRAF_TAG}
     volumes:
+      # Mount for telegraf config
       - ${TELEGRAF_CFG_PATH}:/etc/telegraf/telegraf.conf:rw
-      # - /var/run/docker.sock:/var/run/docker.sock:ro
-      # - /var/log:/var/log:ro
+      # Mount for Docker API Access
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+    user: "113:113"
+    environment:
+      HOSTNAME: "telegraf"
     env_file:
       - .env
     depends_on:
       - influxdb
     networks:
       - tig
-      # - tick
+      - tick
 
   grafana:
-    image: grafana/grafana-oss:8.4.3
+    image: ${GRAFANA_TAG}
     volumes:
+      # - /grafana/etc:/etc/grafana
       - grafana-storage:/var/lib/grafana:rw
     env_file:
       - ./grafana/env.grafana
@@ -44,14 +58,82 @@ services:
       - tig
 
 
+  kapacitor:
+  # Full tag list: https://hub.docker.com/r/library/kapacitor/tags/
+  #https://full-stack-tech-tips.blogspot.com/2021/03/influxdb-and-kapacitor-configuration.html
+    #image: kapacitor:latest
+    image: ${KAPACITOR_TAG}
+    restart: unless-stopped
+    environment:
+      - .env
+    volumes:
+      # Mount for kapacitor data directory
+      - kapacitor-storage:/var/lib/kapacitor
+      # Mount for kapacitor configuration
+      - ./kapacitor/config/:/etc/kapacitor/
+    # Kapacitor requires network access to Influxdb
+    depends_on: 
+      - influxdb
+    ports:
+      # The API for Kapacitor is served on port 9092
+      - "9092:9092"
+    networks:
+      - tick
+
+  chronograf:
+    # Full tag list: https://hub.docker.com/r/library/chronograf/tags/
+  #https://docs.influxdata.com/chronograf/v1.8/administration/creating-connections/
+    image: chronograf:1.10.1
+    #image: ${CHRONOGRAF_TAG}
+    ports: 
+        - "8888:8888"
+#    command: ["--host=0.0.0.0"]
+    volumes: 
+        - chronograf-storage:/var/lib/chronograf
+    depends_on:
+      - influxdb
+      - kapacitor
+      - telegraf
+    networks:
+      - tig
+      - tick
+
+
+
+
+
+
+  # kasa-collector:
+  #   container_name: kasa-collector
+  #   environment:
+  #     TZ: America/Chicago
+  #     KASA_COLLECTOR_COLLECT_INTERVAL: 5
+  #     KASA_COLLECTOR_DEBUG: "false"
+  #     KASA_COLLECTOR_DEBUG_CURL: "false"
+  #     KASA_COLLECTOR_DEBUG_SLEEPING: "false"
+  #     KASA_COLLECTOR_DEVICE_HOST: "172.16.4.15"
+  #     KASA_COLLECTOR_HOST_HOSTNAME: "172.16.1.11"
+  #     KASA_COLLECTOR_INFLUXDB_PASSWORD: "password"
+  #     KASA_COLLECTOR_INFLUXDB_URL: http://influxdb:8086/write?db=kasa
+  #     KASA_COLLECTOR_INFLUXDB_USERNAME: "influxv1"
+  #   image: lux4rd0/kasa-collector:1.0.1
+  #   restart: always
+  #   depends_on:
+  #     - influxdb
+  #   networks:
+  #     - tig
+  #     - tick
+
 
 
 networks:
   tig:
     driver: bridge
-  # tick:
-  #   driver: bridge
+  tick:
+    driver: bridge
 
 volumes:
   grafana-storage:
   influxdb-storage:
+  kapacitor-storage:
+  chronograf-storage:
