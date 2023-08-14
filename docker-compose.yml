@@ -103,26 +103,17 @@ services:
 
 
 
-  # kasa-collector:
-  #   container_name: kasa-collector
-  #   environment:
-  #     TZ: America/Chicago
-  #     KASA_COLLECTOR_COLLECT_INTERVAL: 5
-  #     KASA_COLLECTOR_DEBUG: "false"
-  #     KASA_COLLECTOR_DEBUG_CURL: "false"
-  #     KASA_COLLECTOR_DEBUG_SLEEPING: "false"
-  #     KASA_COLLECTOR_DEVICE_HOST: "172.16.4.15"
-  #     KASA_COLLECTOR_HOST_HOSTNAME: "172.16.1.11"
-  #     KASA_COLLECTOR_INFLUXDB_PASSWORD: "password"
-  #     KASA_COLLECTOR_INFLUXDB_URL: http://influxdb:8086/write?db=kasa
-  #     KASA_COLLECTOR_INFLUXDB_USERNAME: "influxv1"
-  #   image: lux4rd0/kasa-collector:1.0.1
-  #   restart: always
-  #   depends_on:
-  #     - influxdb
-  #   networks:
-  #     - tig
-  #     - tick
+  tplink_to_influx:
+    container_name: tplink_to_influx
+    image: mattv632/tplink_to_influx:1.2
+    restart: always
+    volumes:
+      - ./tplink-to-influx/config.yml:/config.yml
+    depends_on:
+      - influxdb
+    networks:
+      - tig
+      - tick
 
 
 

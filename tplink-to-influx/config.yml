@@ -1,0 +1,54 @@
+---
+
+poller:
+   # If true, the script won't exit and will instead poll in
+   # an infinite loop
+   persist: false
+   # Interval in seconds between polls
+   interval: 10
+
+
+# List tapo devices
+# tapo:
+#     # Tapo devices require that you log in with the credentials
+#     # that you use to log into the app
+#     #
+#     user: "me@mymail.com"
+#     passw: "mysecretpass"
+#     devices:
+#         - 
+#             name: "washing-machine"
+#             ip : 192.168.3.152
+        
+#         - 
+#             name: "big-fridge"
+#             ip : 192.168.3.153
+    
+# List kasa devices
+kasa:
+    devices:
+        - 
+            name: "Server"
+            ip: 172.16.4.15
+        
+        # - 
+        #     name: "tumble-dryer"
+        #     ip : 192.168.3.151
+
+
+# InfluxDB outputs
+influxdb:
+    # -
+    #     name: "Cloud"
+    #     url: "https://foo.example.com"
+    #     token: "aaabbbccc=="
+    #     org: "my org"
+    #     bucket: "telegraf"
+        
+    - 
+        name: "local"
+        url: "http://influxdb:8086"
+        token: "changeme"
+        org: "be1300ecfc0fc866"
+        bucket: "kasa"
+        
